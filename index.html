@@ -19,13 +19,14 @@
     --fs:'Jost',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     --ft:'Cormorant Garamond',Georgia,serif;
   }
+  @property --luz{syntax:'<number>'; inherits:true; initial-value:.35}
   html,body{height:100%}
   body{
     font-family:var(--fs); background:var(--tinta); color:var(--crema);
     min-height:100svh; overflow-x:hidden; overscroll-behavior:none;
   }
   /* la luz de fondo: respira despacio y crece un poco con cada pantalla (--luz la sube el JS) */
-  .halo{position:fixed; inset:0; z-index:0; pointer-events:none; --luz:.35}
+  .halo{position:fixed; inset:0; z-index:0; pointer-events:none; --luz:.2; transition:--luz 1.8s ease}
   .halo::before{
     content:""; position:absolute; left:50%; top:38%; width:720px; height:720px; margin:-360px 0 0 -360px; border-radius:50%;
     background:radial-gradient(circle, rgba(243,192,107,calc(var(--luz) * .55)) 0%, rgba(231,167,160,calc(var(--luz) * .18)) 38%, transparent 68%);
@@ -33,8 +34,10 @@
   }
   @keyframes respira{0%,100%{transform:scale(.92); opacity:.85}50%{transform:scale(1.06); opacity:1}}
   .polvo{position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden}
-  .polvo i{position:absolute; bottom:-10px; width:3px; height:3px; border-radius:50%; background:var(--ambar); opacity:0; animation:sube linear infinite}
-  @keyframes sube{0%{transform:translateY(0); opacity:0}15%{opacity:.55}100%{transform:translateY(-105vh) translateX(20px); opacity:0}}
+  /* luciérnagas: suben despacio y titilan */
+  .polvo i{position:absolute; bottom:-10px; width:4px; height:4px; border-radius:50%; background:#ffe3a3; box-shadow:0 0 8px 2px rgba(243,192,107,.7); opacity:0; animation:sube linear infinite}
+  @keyframes sube{0%{transform:translateY(0) translateX(0); opacity:0}12%{opacity:.8}40%{opacity:.35; transform:translateY(-40vh) translateX(18px)}60%{opacity:.85}100%{transform:translateY(-105vh) translateX(-14px); opacity:0}}
+  canvas.luces{position:fixed; inset:0; z-index:3; pointer-events:none}
 
   .wrap{position:relative; z-index:2; min-height:100svh; display:flex; padding:calc(26px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom))}
   .pantalla{display:none; width:100%; max-width:430px; margin:auto; text-align:center}
@@ -44,7 +47,21 @@
   .pantalla.on > *:nth-child(3){animation-delay:.24s}
   .pantalla.on > *:nth-child(4){animation-delay:.36s}
   .pantalla.on > *:nth-child(5){animation-delay:.48s}
-  @keyframes entra{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+  @keyframes entra{from{opacity:0; transform:translateY(18px); filter:blur(6px)}to{opacity:1; transform:none; filter:none}}
+  /* brillo que recorre las palabras doradas */
+  h2 em, .w.oro{background:linear-gradient(100deg,var(--ambar) 25%,#fff4da 45%,var(--ambar) 65%); background-size:260% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:brilla 5s linear infinite}
+  @keyframes brilla{from{background-position:130% 0}to{background-position:-130% 0}}
+  /* portada: palabra por palabra */
+  #p1 h1{animation:none !important}
+  .w{display:inline-block; opacity:0; filter:blur(12px); transform:translateY(14px) scale(1.04)}
+  #p1.on .w{animation:palabra 1s cubic-bezier(.2,.8,.2,1) var(--d) forwards}
+  #p1.on .w.oro{animation:palabra 1s cubic-bezier(.2,.8,.2,1) var(--d) forwards, brilla 5s linear 2s infinite}
+  @keyframes palabra{to{opacity:1; filter:none; transform:none}}
+  #p1.on .sub{animation-delay:1.25s}
+  #p1.on .vela{animation-delay:.3s}
+  #p1.on #abrirWrap{animation-delay:2.5s}
+  .btn.late{animation:latido 2.6s ease-in-out 3.2s infinite}
+  @keyframes latido{0%,100%{box-shadow:0 12px 32px rgba(243,192,107,.22)}50%{box-shadow:0 12px 50px rgba(243,192,107,.55), 0 0 0 8px rgba(243,192,107,.08)}}
 
   .kicker{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--ambar); opacity:.85; margin-bottom:14px; font-weight:600}
   h1{font-family:var(--ft); font-size:clamp(40px,12vw,56px); line-height:1.02; font-weight:600}
@@ -71,9 +88,12 @@
   .vela .flama{
     position:absolute; left:50%; bottom:90px; width:22px; height:40px; margin-left:-11px; border-radius:50% 50% 45% 45%/62% 62% 38% 38%;
     background:radial-gradient(ellipse at 50% 75%, #fff8e0 0%, #ffd27a 35%, #f39a3a 70%, rgba(243,154,58,0) 100%);
-    transform-origin:50% 90%; animation:titila 2.4s ease-in-out infinite; filter:blur(.3px);
+    transform-origin:50% 90%; animation:enciende 1.1s cubic-bezier(.3,1.6,.5,1) 1.7s both, titila 2.4s ease-in-out 2.8s infinite; filter:blur(.3px);
     box-shadow:0 0 40px 14px rgba(243,192,107,.28);
   }
+  @keyframes enciende{0%{transform:scale(0); opacity:0}55%{transform:scale(1.25,1.6); opacity:1}100%{transform:scale(1); opacity:1}}
+  .destello{position:absolute; left:50%; bottom:96px; width:40px; height:40px; margin-left:-20px; border-radius:50%; background:radial-gradient(circle, rgba(255,232,180,.95), rgba(243,192,107,.35) 45%, transparent 70%); opacity:0; animation:flash 1.6s ease-out 1.75s both; pointer-events:none}
+  @keyframes flash{0%{opacity:0; transform:scale(.2)}20%{opacity:1}100%{opacity:0; transform:scale(11)}}
   @keyframes titila{0%,100%{transform:scale(1) rotate(-1.5deg)}25%{transform:scale(1.04,.96) rotate(1deg)}50%{transform:scale(.97,1.05) rotate(-.5deg)}75%{transform:scale(1.02,.98) rotate(1.5deg)}}
 
   /* ---------- 2. lo que me dijiste ---------- */
@@ -107,14 +127,23 @@
   .prom p b{display:block; font-family:var(--ft); font-size:21px; line-height:1.15; font-weight:600; margin-bottom:4px}
   .prom.firmada{background:rgba(243,192,107,.1); border-color:rgba(243,192,107,.45)}
   .prom.firmada .sello{border-style:solid; background:var(--ambar); color:#20150a; transform:rotate(-8deg) scale(1.08)}
-  .prom-pie{margin-top:14px; font-size:13px; letter-spacing:.12em; text-transform:uppercase; opacity:.55}
+  /* el sello que se estampa cuando están las 4 */
+  .sello-final{width:132px; height:132px; margin:26px auto 20px; border-radius:50%; display:grid; place-content:center; gap:2px; text-align:center; color:#20150a;
+    background:radial-gradient(circle at 35% 30%, #ffe2a0, var(--ambar) 45%, var(--ambar-osc)); box-shadow:0 0 0 6px rgba(243,192,107,.18), 0 18px 40px rgba(0,0,0,.5); transform:rotate(-8deg)}
+  .sello-final span{font-size:10px; letter-spacing:.24em; text-transform:uppercase; font-weight:700; opacity:.75}
+  .sello-final b{font-family:var(--ft); font-style:italic; font-size:24px; line-height:1.05; font-weight:700}
+  #p4btn.vis .sello-final{animation:estampa .75s cubic-bezier(.3,1.5,.5,1) both}
+  @keyframes estampa{0%{transform:scale(2.6) rotate(-30deg); opacity:0}60%{transform:scale(.92) rotate(-6deg); opacity:1}100%{transform:scale(1) rotate(-8deg)}}
+  .golpe{animation:golpe .35s ease}
+  @keyframes golpe{0%,100%{transform:none}30%{transform:translateY(3px) scale(.99)}60%{transform:translateY(-1px)}}
+  .especial{animation:brilla 5s linear infinite}
 
   /* ---------- 5. final ---------- */
   .dedica{position:relative; margin:30px 4px 4px; padding:24px 6px 4px}
   .dedica::before{content:"“"; position:absolute; top:-14px; left:50%; transform:translateX(-50%); font-size:70px; line-height:1; color:var(--ambar); opacity:.35; font-family:var(--ft)}
   .dedica p{font-family:var(--ft); font-size:25px; line-height:1.4; font-style:italic}
   .dedica p b{font-style:normal; font-weight:700; color:var(--ambar)}
-  .especial{margin-top:24px; font-family:var(--ft); font-size:27px; line-height:1.2; font-weight:600; color:var(--ambar)}
+  .especial{margin-top:24px; font-family:var(--ft); font-size:27px; line-height:1.2; font-weight:600; background:linear-gradient(100deg,var(--ambar) 25%,#fff4da 45%,var(--ambar) 65%); background-size:260% 100%; -webkit-background-clip:text; background-clip:text; color:transparent}
   .peli{margin-top:22px; text-align:left; border-radius:18px; padding:16px 18px; background:rgba(251,243,234,.05); border:1px solid rgba(243,192,107,.25)}
   .peli small{display:block; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--ambar); font-weight:600; margin-bottom:6px}
   .peli p{font-size:15.5px; line-height:1.55; opacity:.92}
@@ -145,6 +174,7 @@
   /* movimiento reducido: suave, no estático */
   @media (prefers-reduced-motion:reduce){
     .pantalla.on > *{animation-duration:.4s}
+    #p1.on .w{animation-duration:.4s}
     .polvo{display:none}
     .halo::before{animation-duration:14s}
   }
@@ -153,6 +183,7 @@
 <body>
 <div class="halo" id="halo"></div>
 <div class="polvo" id="polvo"></div>
+<canvas class="luces" id="luces"></canvas>
 <div id="yt"></div>
 <button id="son" aria-label="música">♪</button>
 
@@ -161,10 +192,10 @@
   <!-- 1. portada -->
   <section class="pantalla on" id="p1">
     <div class="kicker">Para mi princesa</div>
-    <h1>Leí todo.<br><em>Con calma.</em></h1>
+    <h1><span class="w" style="--d:.15s">Leí</span> <span class="w" style="--d:.35s">todo.</span><br><span class="w oro" style="--d:.7s"><i>Con</i></span> <span class="w oro" style="--d:.9s"><i>calma.</i></span></h1>
     <p class="sub">Y tienes razón.</p>
-    <div class="vela" aria-hidden="true"><div class="flama"></div><div class="mecha"></div><div class="cera"></div></div>
-    <div style="margin-top:30px"><button class="btn" id="abrir">Ábrelo</button></div>
+    <div class="vela" aria-hidden="true"><div class="destello"></div><div class="flama"></div><div class="mecha"></div><div class="cera"></div></div>
+    <div style="margin-top:30px" id="abrirWrap"><button class="btn late" id="abrir">Ábrelo</button></div>
   </section>
 
   <!-- 2. lo que me dijiste -->
@@ -198,7 +229,7 @@
     <h2>Lo que<br><em>te prometo</em></h2>
     <p class="sub">Tócalas y las firmo.</p>
     <div class="promesas" id="promesas"></div>
-    <div class="prom-pie oculto" id="p4btn"><div style="margin-bottom:14px">firmado</div><button class="btn" id="aFinal">Una última cosa →</button></div>
+    <div class="oculto" id="p4btn"><div class="sello-final"><span>Firmado</span><b>tu Ferny</b><span>17 · oct · 26</span></div><button class="btn late" id="aFinal">Una última cosa →</button></div>
   </section>
 
   <!-- 5. final -->
@@ -280,7 +311,10 @@ PROMESAS.forEach(p => {
     if (c.classList.contains('firmada')) return;
     c.classList.add('firmada');
     if (navigator.vibrate) navigator.vibrate(18);
-    if (++firmadas === PROMESAS.length) setTimeout(() => muestra('p4btn'), 600);
+    if (++firmadas === PROMESAS.length) setTimeout(() => {
+      muestra('p4btn');
+      setTimeout(() => { const g = $('#promesas'); g.classList.add('golpe'); if (navigator.vibrate) navigator.vibrate([30,40,60]); }, 450);
+    }, 600);
   });
   $('#promesas').appendChild(c);
 });
@@ -288,7 +322,10 @@ PROMESAS.forEach(p => {
 $('#abrir').addEventListener('click', () => { arrancar(); ir('p2', .5); });
 $('#aCarta').addEventListener('click', () => ir('p3', .65));
 $('#aPromesas').addEventListener('click', () => ir('p4', .8));
-$('#aFinal').addEventListener('click', () => ir('p5', 1));
+$('#aFinal').addEventListener('click', () => { ir('p5', 1); setTimeout(() => linternas(46), 500); });
+$('#wa').addEventListener('click', () => linternas(60));
+// la vela de la portada sube la luz del fondo cuando se enciende
+setTimeout(() => halo.style.setProperty('--luz', .4), 1750);
 $('#otraVez').addEventListener('click', e => { e.preventDefault(); ir('p2', .5); });
 
 /* WhatsApp: abre el chat de él con la confirmación ya escrita */
@@ -314,7 +351,7 @@ const dos = n => String(n).padStart(2,'0');
 /* ---------- partículas de luz que suben ---------- */
 (function(){
   const c = $('#polvo');
-  for (let i = 0; i < 18; i++){
+  for (let i = 0; i < 26; i++){
     const s = document.createElement('i');
     s.style.left = (Math.random()*100) + '%';
     s.style.animationDuration = (12 + Math.random()*12) + 's';
@@ -323,6 +360,31 @@ const dos = n => String(n).padStart(2,'0');
     c.appendChild(s);
   }
 })();
+
+/* ---------- luces que suben (como linternas), no confeti: el tono es de calma ---------- */
+function linternas(cuantas){
+  const cv = $('#luces'), ctx = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 2);
+  const W = innerWidth, H = innerHeight;
+  cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  const suave = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ls = Array.from({length: suave ? Math.round(cuantas/3) : cuantas}, () => ({
+    x: Math.random()*W, y: H + Math.random()*H*.5, r: 2.5 + Math.random()*6,
+    v: .6 + Math.random()*1.4, f: Math.random()*6.28, a: 0,
+    c: Math.random() < .75 ? '255,214,140' : '231,167,160'
+  }));
+  let t = 0;
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    ls.forEach(l => {
+      l.y -= l.v; l.f += .03; l.x += Math.sin(l.f)*.5;
+      l.a = Math.min(1, l.a + .02) * (l.y < H*.15 ? .97 : 1);
+      const g = ctx.createRadialGradient(l.x,l.y,0,l.x,l.y,l.r*4);
+      g.addColorStop(0,'rgba('+l.c+','+(.9*l.a)+')'); g.addColorStop(.3,'rgba('+l.c+','+(.35*l.a)+')'); g.addColorStop(1,'rgba('+l.c+',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(l.x,l.y,l.r*4,0,6.28); ctx.fill();
+    });
+    if (++t < 520) requestAnimationFrame(loop); else ctx.clearRect(0,0,W,H);
+  })();
+}
 
 /* ---------- música opcional (YouTube); no funciona desde file:// ---------- */
 const btnSon = $('#son');
